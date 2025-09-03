@@ -25,6 +25,17 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+.product-page-title {
+  font-size: 40px;
+  font-weight: 700;
+  text-align: center;
+  margin: 50px 0;
+}
+
+.product-grid {
+  padding : 20px
+}
+
 .product-list-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -33,7 +44,7 @@ body {
   margin: 0 auto;
 }
 
-.product-list-grid div {
+.product-list-grid a {
   border: 1px solid #0a0a0a;
   display: flex;
   flex-direction: column;

@@ -15,6 +15,7 @@ const GET_PRODUCTS = gql`
         ... on SimpleProduct {
           id
           price
+          uri
         }
       }
     }

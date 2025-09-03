@@ -2,6 +2,7 @@
 
 import { useQuery } from '@apollo/client';
 import GET_PRODUCTS from '@/queries/get-products-list';
+import Link from 'next/link';
 
 interface Product {
   id: number;
@@ -10,9 +11,10 @@ interface Product {
   onSale: boolean;
   image: {
     altText: string;
-    sourceUrl: string; // Use `sourceUrl` as per WooCommerce schema
+    uri: string; // Use `sourceUrl` as per WooCommerce schema
   } | null;
   price: string | null;
+  uri: string;
 }
 
 interface ProductsData {
@@ -34,20 +36,20 @@ export default function ProductList() {
   // Display products
   return (
     <div>
-      <h1>Products</h1>
+      <h1 className='product-page-title'>Products</h1>
       <div className='product-list-grid'>
             {data?.products?.nodes?.map((product, index) => (
-            <div key={product.id || index} style={{ marginBottom: '10px' }}>
-            <h2>{product.name}</h2>
-            {product.image?.sourceUrl && (
+            <Link className="product-grid" key={product.id || index} style={{ marginBottom: '10px' }} href={`${process.env.NEXT_PUBLIC_API_URL}${product.uri}`}>
+            {product.image?.uri && (
                 <img
-                src={product.image.sourceUrl}
+                src={`${process.env.NEXT_PUBLIC_WORDPRESS_API_URL}${product.image.uri}`}
                 alt={product.image.altText || product.name}
                 style={{ width: '100px', height: '100px', objectFit: 'cover' }}
                 />
             )}
+            <h2>{product.name}</h2>
             <p>{product.price ? `$${product.price}` : 'Price not available'}</p>
-            </div>
+            </Link>
         ))}
       </div>
     </div>
