@@ -24,6 +24,7 @@ interface ProductsData {
 }
 
 export default function ProductList() {
+  
   // Fetch products from WooCommerce GraphQL API
   const { data, loading, error } = useQuery<ProductsData>(GET_PRODUCTS);
 

@@ -246,9 +246,6 @@ export default function ProductDetail({ slug }: ProductDetailProps) {
                   fontSize: '1rem'
                 }}
               />
-              <span style={{ color: '#666', fontSize: '0.9rem' }}>
-                {product.stockQuantity ? `Max: ${product.stockQuantity}` : 'No limit'}
-              </span>
             </div>
             
             <button

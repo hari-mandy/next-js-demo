@@ -1,7 +1,7 @@
-import { ApolloClient, InMemoryCache } from '@apollo/client';
+import { ApolloClient, InMemoryCache } from "@apollo/client";
 
 const client = new ApolloClient({
-  uri: `${process.env.NEXT_PUBLIC_WORDPRESS_API_URL}/graphql`, // Replace with your WordPress URL
+  uri: "/api/graphql", // This hits your Next.js route handler
   cache: new InMemoryCache(),
 });
 
