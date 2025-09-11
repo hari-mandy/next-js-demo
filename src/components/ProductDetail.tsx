@@ -3,6 +3,7 @@ import { useQuery } from '@apollo/client';
 import { useState } from 'react';
 import { GET_PRODUCT_BY_SLUG } from '../queries/get-products-by-slug';
 import { ProductDetailData } from '../types/product';
+import { useShoppingCart } from 'use-shopping-cart'
 // import RelatedProducts from './RelatedProducts';
 
 interface ProductDetailProps {
@@ -11,11 +12,38 @@ interface ProductDetailProps {
 
 export default function ProductDetail({ slug }: ProductDetailProps) {
   const [selectedImage, setSelectedImage] = useState(0);
+  const { addItem } = useShoppingCart()
   const [quantity, setQuantity] = useState(1);
+
 
   const { data, loading, error } = useQuery<ProductDetailData>(GET_PRODUCT_BY_SLUG, {
     variables: { slug },
   });
+
+  function handleAddToCart() {
+    // Read existing cart from localStorage
+    const existingCart = JSON.parse(localStorage.getItem("cartProducts") || "[]");
+
+    // Find if product already exists
+    const existingProductIndex = existingCart.findIndex(
+      (item: { id: string }) => item.id === product.id
+    );
+
+    if (existingProductIndex > -1) {
+      // Update quantity if product already exists
+      existingCart[existingProductIndex].quantity += quantity;
+    } else {
+      // Add new product
+      existingCart.push({
+        id: product.id,
+        quantity: quantity,
+      });
+    }
+
+    // Save back to localStorage
+    localStorage.setItem("cartProducts", JSON.stringify(existingCart));
+  }
+
 
   if (loading) return <div style={{ padding: '2rem' }}>Loading product...</div>;
   if (error) return <div style={{ padding: '2rem' }}>Error: {error.message}</div>;
@@ -25,6 +53,16 @@ export default function ProductDetail({ slug }: ProductDetailProps) {
   const images = product.galleryImages?.nodes || [];
   const mainImage = product.image;
   const allImages = mainImage ? [mainImage, ...images] : images;
+
+  const cartItem = {
+    id: product.id,
+    name: product.name,
+    price: product.price.replace(/,/g, "").replace(/[^\d.]/g, ""),
+    currency: 'RUP', // or pull from settings
+    image: product.image?.sourceUrl || '/placeholder-image.png',
+  }
+
+  console.log()
 
   return (
     <div style={{ padding: '2rem', maxWidth: '1200px', margin: '0 auto' }}>
@@ -46,29 +84,6 @@ export default function ProductDetail({ slug }: ProductDetailProps) {
               }}
             />
           </div>
-
-          {/* Gallery Thumbnails */}
-          {allImages.length > 1 && (
-            <div style={{ display: 'flex', gap: '0.5rem', overflowX: 'auto' }}>
-              {allImages.map((image, index) => (
-                <img
-                  key={index}
-                  src={image.sourceUrl}
-                  alt={image.altText}
-                  onClick={() => setSelectedImage(index)}
-                  style={{
-                    width: '80px',
-                    height: '80px',
-                    objectFit: 'cover',
-                    cursor: 'pointer',
-                    border: selectedImage === index ? '3px solid #0070f3' : '1px solid #ddd',
-                    borderRadius: '4px',
-                    transition: 'border 0.2s'
-                  }}
-                />
-              ))}
-            </div>
-          )}
         </div>
 
         {/* Product Information Section */}
@@ -114,118 +129,6 @@ export default function ProductDetail({ slug }: ProductDetailProps) {
             )}
           </div>
 
-          {/* Stock Status */}
-          <div style={{ marginBottom: '1.5rem' }}>
-            <span style={{
-              padding: '0.5rem 1rem',
-              borderRadius: '25px',
-              fontSize: '0.875rem',
-              fontWeight: 'bold',
-              backgroundColor: product.stockStatus === 'IN_STOCK' ? '#d4edda' : '#f8d7da',
-              color: product.stockStatus === 'IN_STOCK' ? '#155724' : '#721c24',
-              border: `1px solid ${product.stockStatus === 'IN_STOCK' ? '#c3e6cb' : '#f5c6cb'}`
-            }}>
-              {product.stockStatus === 'IN_STOCK' ? '✓ In Stock' : '✗ Out of Stock'}
-            </span>
-            {product.stockQuantity && product.stockStatus === 'IN_STOCK' && (
-              <span style={{ marginLeft: '1rem', color: '#666', fontSize: '0.9rem' }}>
-                Only {product.stockQuantity} left in stock
-              </span>
-            )}
-          </div>
-
-          {/* Short Description */}
-          {product.shortDescription && (
-            <div 
-              style={{ 
-                marginBottom: '2rem', 
-                lineHeight: '1.6',
-                color: '#555',
-                fontSize: '1.1rem'
-              }}
-              dangerouslySetInnerHTML={{ __html: product.shortDescription }}
-            />
-          )}
-
-          {/* Product Details */}
-          <div style={{ marginBottom: '2rem' }}>
-            {product.sku && (
-              <p style={{ marginBottom: '0.5rem', color: '#666' }}>
-                <strong>SKU:</strong> {product.sku}
-              </p>
-            )}
-            
-            {product.weight && (
-              <p style={{ marginBottom: '0.5rem', color: '#666' }}>
-                <strong>Weight:</strong> {product.weight} kg
-              </p>
-            )}
-
-            {product.dimensions && (product.dimensions.length || product.dimensions.width || product.dimensions.height) && (
-              <p style={{ marginBottom: '0.5rem', color: '#666' }}>
-                <strong>Dimensions:</strong> {product.dimensions.length} × {product.dimensions.width} × {product.dimensions.height} cm
-              </p>
-            )}
-          </div>
-
-          {/* Categories */}
-          {product.productCategories?.nodes && product.productCategories.nodes.length > 0 && (
-            <div style={{ marginBottom: '1.5rem' }}>
-              <strong style={{ marginBottom: '0.5rem', display: 'block' }}>Categories:</strong>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-                {product.productCategories.nodes.map((category, index) => (
-                  <a 
-                    key={category.id}
-                    href={`/products/category/${category.slug}`} 
-                    style={{ 
-                      color: '#0070f3',
-                      textDecoration: 'none',
-                      padding: '0.25rem 0.75rem',
-                      border: '1px solid #0070f3',
-                      borderRadius: '20px',
-                      fontSize: '0.875rem',
-                      transition: 'all 0.2s'
-                    }}
-                    onMouseOver={(e) => {
-                      e.currentTarget.style.backgroundColor = '#0070f3';
-                      e.currentTarget.style.color = 'white';
-                    }}
-                    onMouseOut={(e) => {
-                      e.currentTarget.style.backgroundColor = 'transparent';
-                      e.currentTarget.style.color = '#0070f3';
-                    }}
-                  >
-                    {category.name}
-                  </a>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Tags */}
-          {product.productTags?.nodes && product.productTags.nodes.length > 0 && (
-            <div style={{ marginBottom: '1.5rem' }}>
-              <strong style={{ marginBottom: '0.5rem', display: 'block' }}>Tags:</strong>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-                {product.productTags.nodes.map((tag) => (
-                  <span 
-                    key={tag.id}
-                    style={{ 
-                      color: '#666',
-                      fontSize: '0.875rem',
-                      padding: '0.25rem 0.5rem',
-                      backgroundColor: '#f8f9fa',
-                      borderRadius: '15px',
-                      border: '1px solid #e9ecef'
-                    }}
-                  >
-                    #{tag.name}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-
           {/* Add to Cart Section */}
           <div style={{ marginBottom: '2rem', padding: '1.5rem', backgroundColor: '#f8f9fa', borderRadius: '8px' }}>
             <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginBottom: '1rem' }}>
@@ -250,6 +153,7 @@ export default function ProductDetail({ slug }: ProductDetailProps) {
             
             <button
               disabled={product.stockStatus !== 'IN_STOCK'}
+              className='product-add-to-cart-button'
               style={{
                 width: '100%',
                 padding: '1rem 2rem',
@@ -262,10 +166,12 @@ export default function ProductDetail({ slug }: ProductDetailProps) {
                 fontSize: '1.1rem',
                 transition: 'background-color 0.2s'
               }}
-              onClick={() => {
-                // Add your cart logic here
-                alert(`Added ${quantity} × ${product.name} to cart!`);
-              }}
+              // onClick={() => {
+              //   // Add your cart logic here
+              //   handleAddToCart();
+              //   alert(`Added ${quantity} × ${product.name} to cart!`);
+              // }}
+              onClick={() => addItem(cartItem, { count: quantity})}
               onMouseOver={(e) => {
                 if (product.stockStatus === 'IN_STOCK') {
                   e.currentTarget.style.backgroundColor = '#0056b3';
@@ -280,83 +186,8 @@ export default function ProductDetail({ slug }: ProductDetailProps) {
               {product.stockStatus === 'IN_STOCK' ? 'Add to Cart' : 'Out of Stock'}
             </button>
           </div>
-
-          {/* Product Attributes */}
-          {product.attributes?.nodes && product.attributes.nodes.length > 0 && (
-            <div style={{ marginBottom: '2rem' }}>
-              <h3 style={{ marginBottom: '1rem' }}>Product Specifications</h3>
-              <div style={{ backgroundColor: 'white', padding: '1rem', borderRadius: '8px', border: '1px solid #ddd' }}>
-                {product.attributes.nodes.map((attribute, index) => (
-                  <div 
-                    key={index} 
-                    style={{ 
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      padding: '0.5rem 0',
-                    }}
-                  >
-                    <strong>{attribute.name}:</strong>
-                    <span>{attribute.options.join(', ')}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
       </div>
-
-      {/* Full Description */}
-      {product.description && (
-        <div style={{ marginTop: '4rem' }}>
-          <h2 style={{ marginBottom: '1.5rem', paddingBottom: '0.5rem', borderBottom: '2px solid #0070f3' }}>
-            Product Description
-          </h2>
-          <div 
-            style={{ 
-              lineHeight: '1.8',
-              fontSize: '1rem',
-              color: '#555'
-            }}
-            dangerouslySetInnerHTML={{ __html: product.description }}
-          />
-        </div>
-      )}
-
-      {/* Reviews Section */}
-      {product.reviews && (
-        <div style={{ marginTop: '3rem' }}>
-          <h3 style={{ marginBottom: '1rem' }}>Customer Reviews</h3>
-          <div style={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            gap: '1rem',
-            padding: '1rem',
-            backgroundColor: '#f8f9fa',
-            borderRadius: '8px'
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <span style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>
-                {product.reviews.averageRating.toFixed(1)}
-              </span>
-              <div style={{ display: 'flex' }}>
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <span 
-                    key={star}
-                    style={{ 
-                      fontSize: '1.2rem'
-                    }}
-                  >
-                    ★
-                  </span>
-                ))}
-              </div>
-            </div>
-            <span style={{ color: '#666' }}>
-              ({product.reviews.reviewCount} review{product.reviews.reviewCount !== 1 ? 's' : ''})
-            </span>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

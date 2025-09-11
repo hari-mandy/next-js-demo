@@ -49,7 +49,7 @@ export default function ProductList() {
                 />
             )}
             <h2>{product.name}</h2>
-            <p>{product.price ? `$${product.price}` : 'Price not available'}</p>
+            <p>{product.price ? `${product.price}` : 'Price not available'}</p>
             </Link>
         ))}
       </div>

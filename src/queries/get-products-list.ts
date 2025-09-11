@@ -17,6 +17,12 @@ const GET_PRODUCTS = gql`
           price
           uri
         }
+        ... on VariableProduct {
+            id
+            name
+            uri
+            price
+        }
       }
     }
   }
