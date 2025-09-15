@@ -3,6 +3,7 @@
 import { useQuery } from '@apollo/client';
 import GET_PRODUCTS from '@/queries/get-products-list';
 import Link from 'next/link';
+import Image from 'next/image';
 
 interface Product {
   id: number;
@@ -42,9 +43,11 @@ export default function ProductList() {
             {data?.products?.nodes?.map((product, index) => (
             <Link className="product-grid" key={product.id || index} style={{ marginBottom: '10px' }} href={`${process.env.NEXT_PUBLIC_API_URL}${product.uri}`}>
             {product.image?.uri && (
-                <img
+                <Image
                 src={`${process.env.NEXT_PUBLIC_WORDPRESS_API_URL}${product.image.uri}`}
                 alt={product.image.altText || product.name}
+                width={500}
+                height={500}
                 style={{ width: '100px', height: '100px', objectFit: 'cover' }}
                 />
             )}

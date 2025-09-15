@@ -1,6 +1,7 @@
 'use client'
 
 import { useShoppingCart } from 'use-shopping-cart'
+import Image from 'next/image';
 
 export default function CartPage() {
   const {
@@ -34,7 +35,7 @@ export default function CartPage() {
                   marginBottom: '1rem',
                 }}
               >
-                <img
+                <Image
                   src={item.image as string}
                   alt={item.name}
                   width={60}

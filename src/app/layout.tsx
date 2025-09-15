@@ -25,6 +25,7 @@ export default function RootLayout({
               {children}
             </CartProvider>
         </ApolloProvider>
+        <script src="https://cdn.tailwindcss.com"></script>
       </body>
     </html>
   );

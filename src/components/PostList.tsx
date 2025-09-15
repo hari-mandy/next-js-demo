@@ -2,6 +2,7 @@
 import { useQuery } from '@apollo/client';
 import { GET_POSTS } from '../lib/queries';
 import { PostsData } from '../types/post';
+import Image from 'next/image';
 
 export default function PostList() {
   // Fetch posts from WordPress
@@ -31,7 +32,7 @@ export default function PostList() {
           
           {/* Show featured image if it exists */}
           {post.featuredImage && (
-            <img 
+            <Image 
               src={post.featuredImage.node.sourceUrl} 
               alt={post.featuredImage.node.altText}
               style={{ 
