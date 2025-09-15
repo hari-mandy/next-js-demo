@@ -23,6 +23,12 @@ const GET_PRODUCTS = gql`
             uri
             price
         }
+        ... on GroupProduct {
+          id
+          name
+          uri
+          price
+        }
       }
     }
   }

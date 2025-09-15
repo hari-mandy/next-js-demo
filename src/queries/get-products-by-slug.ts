@@ -62,8 +62,25 @@ export const GET_PRODUCT_BY_SLUG = gql`
                 value
               }
             }
+            featuredImage {
+              node {
+                altText
+                link
+              }
+            }
           }
         }
+      }
+      ... on GroupProduct {
+          id
+          name
+          price
+          featuredImage {
+            node {
+              altText
+              link
+            }
+          }
       }
       reviews {
         averageRating
