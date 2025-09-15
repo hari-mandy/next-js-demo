@@ -3,66 +3,76 @@ import { useQuery } from '@apollo/client';
 import { useState } from 'react';
 import { GET_PRODUCT_BY_SLUG } from '../queries/get-products-by-slug';
 import { ProductDetailData } from '../types/product';
-import { useShoppingCart } from 'use-shopping-cart'
-// import RelatedProducts from './RelatedProducts';
+import { useShoppingCart } from 'use-shopping-cart';
+import Image from 'next/image';
 
 interface ProductDetailProps {
   slug: string;
 }
 
-export default function ProductDetail({ slug }: ProductDetailProps) {
-  const [selectedImage, setSelectedImage] = useState(0);
-  const { addItem } = useShoppingCart()
-  const [quantity, setQuantity] = useState(1);
+// interface VariationAttribute {
+//   name: string;
+//   value: string;
+// }
 
+//  interface VariationImageNode {
+//   altText: string;
+//   link: string; // WPGraphQL sometimes uses `link` instead of `sourceUrl`
+// }
+
+//  interface VariationImage {
+//   node: VariationImageNode;
+// }
+
+// interface Variation {
+//   id: string;
+//   name: string;
+//   price: string | null;
+//   stockStatus: string;
+//   attributes: {
+//     nodes: VariationAttribute[];
+//   };
+//   featuredImage?: VariationImage | null;
+// }
+
+export default function ProductDetail({ slug }: ProductDetailProps) {
+  const [quantity, setQuantity] = useState(1);
+  const [selectedVariation, setSelectedVariation] = useState<any>(null);
+  const { addItem } = useShoppingCart();
 
   const { data, loading, error } = useQuery<ProductDetailData>(GET_PRODUCT_BY_SLUG, {
     variables: { slug },
   });
-
-  function handleAddToCart() {
-    // Read existing cart from localStorage
-    const existingCart = JSON.parse(localStorage.getItem("cartProducts") || "[]");
-
-    // Find if product already exists
-    const existingProductIndex = existingCart.findIndex(
-      (item: { id: string }) => item.id === product.id
-    );
-
-    if (existingProductIndex > -1) {
-      // Update quantity if product already exists
-      existingCart[existingProductIndex].quantity += quantity;
-    } else {
-      // Add new product
-      existingCart.push({
-        id: product.id,
-        quantity: quantity,
-      });
-    }
-
-    // Save back to localStorage
-    localStorage.setItem("cartProducts", JSON.stringify(existingCart));
-  }
-
 
   if (loading) return <div style={{ padding: '2rem' }}>Loading product...</div>;
   if (error) return <div style={{ padding: '2rem' }}>Error: {error.message}</div>;
   if (!data?.product) return <div style={{ padding: '2rem' }}>Product not found</div>;
 
   const product = data.product;
-  const images = product.galleryImages?.nodes || [];
-  const mainImage = product.image;
-  const allImages = mainImage ? [mainImage, ...images] : images;
+
+  // 🔑 Use variation if selected, otherwise fallback to product
+  const displayItem = selectedVariation ? selectedVariation : product;
 
   const cartItem = {
-    id: product.id,
-    name: product.name,
-    price: product.price.replace(/,/g, "").replace(/[^\d.]/g, ""),
-    currency: 'RUP', // or pull from settings
-    image: product.image?.sourceUrl || '/placeholder-image.png',
-  }
+    id: displayItem.id,
+    name: displayItem.name,
+    price: Number(displayItem.price
+          ? displayItem.price.replace(/,/g, '').replace(/[^\d.]/g, '')
+          : 0
+      ) * 100,
+    currency: 'INR',
+    sku: displayItem.sku,
+    image: selectedVariation?.featuredImage?.node?.link || displayItem.image?.sourceUrl,
+  };
 
-  console.log()
+  // ✅ Update state on variation selection
+  const handleVariationSelection = (variationId: string) => {
+    const variation = product.variations?.nodes.find(v => v.id === variationId);
+    if (variation) {
+      setSelectedVariation(variation);
+    }
+  };
+
 
   return (
     <div style={{ padding: '2rem', maxWidth: '1200px', margin: '0 auto' }}>
@@ -70,11 +80,20 @@ export default function ProductDetail({ slug }: ProductDetailProps) {
         
         {/* Product Images Section */}
         <div>
-          {/* Main Image Display */}
           <div style={{ marginBottom: '1rem' }}>
-            <img
-              src={allImages[selectedImage]?.sourceUrl || '/placeholder-image.png'}
-              alt={allImages[selectedImage]?.altText || product.name}
+            <Image
+              src={
+                selectedVariation?.featuredImage?.node?.link ||
+                displayItem.image?.sourceUrl ||
+                ''                            
+              }
+              alt={
+                selectedVariation?.featuredImage?.node?.altText ||  
+                displayItem.image?.altText ||
+                displayItem.name
+              }
+              width= {500}
+              height={500}
               style={{
                 width: '100%',
                 height: '400px',
@@ -86,31 +105,24 @@ export default function ProductDetail({ slug }: ProductDetailProps) {
           </div>
         </div>
 
-        {/* Product Information Section */}
+        {/* Product Info */}
         <div>
-          {/* Product Title */}
           <h1 style={{ marginBottom: '1rem', fontSize: '2rem', fontWeight: 'bold' }}>
-            {product.name}
+            {displayItem.name}
           </h1>
-          
+
           {/* Price Section */}
           <div style={{ marginBottom: '1rem' }}>
-            {product.onSale && product.salePrice ? (
+            {displayItem.salePrice ? (
               <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                <span style={{ 
-                  fontSize: '2rem', 
-                  fontWeight: 'bold', 
-                  color: '#e74c3c' 
-                }}>
-                  {product.salePrice}
+                <span style={{ fontSize: '2rem', fontWeight: 'bold', color: '#e74c3c' }}>
+                  {displayItem.salePrice}
                 </span>
-                <span style={{ 
-                  fontSize: '1.5rem',
-                  textDecoration: 'line-through', 
-                  color: '#666' 
-                }}>
-                  {product.regularPrice}
-                </span>
+                {displayItem.regularPrice && (
+                  <span style={{ fontSize: '1.5rem', textDecoration: 'line-through', color: '#666' }}>
+                    {displayItem.regularPrice}
+                  </span>
+                )}
                 <span style={{
                   backgroundColor: '#e74c3c',
                   color: 'white',
@@ -124,21 +136,38 @@ export default function ProductDetail({ slug }: ProductDetailProps) {
               </div>
             ) : (
               <span style={{ fontSize: '2rem', fontWeight: 'bold' }}>
-                {product.price}
+                {displayItem.price}
               </span>
             )}
           </div>
 
-          {/* Add to Cart Section */}
+          {/* Variations */}
+          {product.variations && product.variations.nodes.length > 0 && (
+            <div className="flex gap-2 mb-4">
+              {product.variations.nodes.map((variation) => (
+                <button
+                  key={variation.id}
+                  onClick={() => handleVariationSelection(variation.id)}
+                  className={`p-2 border rounded-lg ${
+                    selectedVariation?.id === variation.id ? 'bg-blue-100 border-blue-500' : ''
+                  }`}
+                >
+                  {variation.attributes.nodes.map((attr, idx) => (
+                    <span key={idx}>{attr.value}</span>
+                  ))}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* Add to Cart */}
           <div style={{ marginBottom: '2rem', padding: '1.5rem', backgroundColor: '#f8f9fa', borderRadius: '8px' }}>
             <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginBottom: '1rem' }}>
-              <label style={{ fontWeight: 'bold', minWidth: '80px' }}>
-                Quantity:
-              </label>
+              <label style={{ fontWeight: 'bold', minWidth: '80px' }}>Quantity:</label>
               <input
                 type="number"
                 min="1"
-                max={product.stockQuantity || 999}
+                max={displayItem.stockQuantity || 999}
                 value={quantity}
                 onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
                 style={{
@@ -150,40 +179,23 @@ export default function ProductDetail({ slug }: ProductDetailProps) {
                 }}
               />
             </div>
-            
+
             <button
-              disabled={product.stockStatus !== 'IN_STOCK'}
-              className='product-add-to-cart-button'
+              disabled={displayItem.stockStatus !== 'IN_STOCK'}
               style={{
                 width: '100%',
                 padding: '1rem 2rem',
-                backgroundColor: product.stockStatus === 'IN_STOCK' ? '#0070f3' : '#ccc',
+                backgroundColor: displayItem.stockStatus === 'IN_STOCK' ? '#0070f3' : '#ccc',
                 color: 'white',
                 border: 'none',
                 borderRadius: '8px',
-                cursor: product.stockStatus === 'IN_STOCK' ? 'pointer' : 'not-allowed',
+                cursor: displayItem.stockStatus === 'IN_STOCK' ? 'pointer' : 'not-allowed',
                 fontWeight: 'bold',
-                fontSize: '1.1rem',
-                transition: 'background-color 0.2s'
+                fontSize: '1.1rem'
               }}
-              // onClick={() => {
-              //   // Add your cart logic here
-              //   handleAddToCart();
-              //   alert(`Added ${quantity} × ${product.name} to cart!`);
-              // }}
-              onClick={() => addItem(cartItem, { count: quantity})}
-              onMouseOver={(e) => {
-                if (product.stockStatus === 'IN_STOCK') {
-                  e.currentTarget.style.backgroundColor = '#0056b3';
-                }
-              }}
-              onMouseOut={(e) => {
-                if (product.stockStatus === 'IN_STOCK') {
-                  e.currentTarget.style.backgroundColor = '#0070f3';
-                }
-              }}
+              onClick={() => addItem(cartItem, { count: quantity })}
             >
-              {product.stockStatus === 'IN_STOCK' ? 'Add to Cart' : 'Out of Stock'}
+              {displayItem.stockStatus === 'IN_STOCK' ? 'Add to Cart' : 'Out of Stock'}
             </button>
           </div>
         </div>

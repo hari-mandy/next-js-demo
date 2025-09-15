@@ -1,8 +1,12 @@
 @import "tailwindcss";
 
+/* Import Tailwind directives */
+@source inline("bg-{red,blue,green}-500");
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --wp--preset--spacing--40:40px;
 }
 
 @theme inline {
@@ -51,3 +55,5 @@ body {
   align-items: center;
   justify-content: center;
 }
+
+
