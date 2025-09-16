@@ -81,20 +81,16 @@ export const GET_PRODUCT_BY_SLUG = gql`
               link
             }
           }
+          products {
+            nodes {
+              id
+              name
+              slug
+            }
+          }
       }
       reviews {
         averageRating
-      }
-      related {
-        nodes {
-          id
-          name
-          slug
-          image {
-            sourceUrl
-            altText
-          }
-        }
       }
     }
   }

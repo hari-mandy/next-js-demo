@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery } from '@apollo/client';
-import GET_PRODUCTS from '@/queries/get-products-list';
+import GET_PRODUCTS from '../../queries/get-products-list';
 import Link from 'next/link';
 import Image from 'next/image';
 
