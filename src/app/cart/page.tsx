@@ -2,6 +2,7 @@
 
 import { useShoppingCart } from 'use-shopping-cart'
 import Image from 'next/image';
+import Link from 'next/link';
 
 export default function CartPage() {
   const {
@@ -58,7 +59,8 @@ export default function CartPage() {
           </ul>
 
           <h2>Total: ₹{totalPrice}</h2>
-          <button onClick={() => clearCart()}>Clear Cart</button>
+          <button onClick={() => clearCart()} className='bg-transparent hover:bg-red-500 text-red-700 font-semibold hover:text-white py-2 px-4 border border-red-500 hover:border-transparent rounded mr-4 transition duration-500 ease-in-out'>Clear Cart</button>
+          <Link className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-500 ease-in-out' href='/checkout'>Proceed to checkout</Link>
         </>
       )}
     </div>

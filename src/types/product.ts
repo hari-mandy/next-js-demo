@@ -1,5 +1,6 @@
 // Basic product type (you might already have this)
 export interface Product {
+  databaseId?: number;
   id: string;
   name: string;
   slug: string;
@@ -51,6 +52,7 @@ export interface Product {
   };
   variations?: {
     nodes: Array<{
+      databaseId?: number;
       id: string;
       name: string;
       price: string;

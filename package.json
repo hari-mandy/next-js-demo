@@ -10,7 +10,9 @@
   },
   "dependencies": {
     "@apollo/client": "^3.13.9",
+    "@faustwp/blocks": "^6.1.5",
     "@tailwindcss/typography": "^0.5.16",
+    "@wordpress/block-serialization-default-parser": "^5.31.0",
     "cross-fetch": "^4.1.0",
     "graphql": "^16.11.0",
     "graphql-tag": "^2.12.6",

@@ -1,10 +1,11 @@
 'use client';
 
-import { useQuery } from '@apollo/client';
+import { useQuery, useMutation } from '@apollo/client';
 import { useEffect, useState } from 'react';
 import { GET_PRODUCT_BY_SLUG } from '../queries/get-products-by-slug';
 import { ProductDetailData } from '../types/product';
 import { useShoppingCart } from 'use-shopping-cart';
+import { ADD_TO_CART } from '../queries/add-to-cart';
 import Image from 'next/image';
 
 interface ProductDetailProps {
@@ -16,6 +17,7 @@ export default function ProductDetail({ slug }: ProductDetailProps) {
   const [selectedVariation, setSelectedVariation] = useState<any>(null);
   const [displayItem, setDisplayItem] = useState<any>(null);
   const [addToCartBtn, setAddToCartBtn] = useState(false);
+  const [addToCartMutation] = useMutation(ADD_TO_CART);
 
   const { addItem } = useShoppingCart();
 
@@ -82,7 +84,14 @@ export default function ProductDetail({ slug }: ProductDetailProps) {
     }
   };
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
+    const productDatabaseId = selectedVariation?.databaseId ?? product?.databaseId;
+    if (!productDatabaseId) return;
+
+    await addToCartMutation({
+      variables: { productId: productDatabaseId, quantity }
+    });
+
     addItem(cartItem, { count: quantity });
     setAddToCartBtn(true);
   };

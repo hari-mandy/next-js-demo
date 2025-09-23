@@ -5,6 +5,7 @@ import { gql } from '@apollo/client';
 export const GET_PRODUCT_BY_SLUG = gql`
   query GetProductBySlug($slug: ID!) {
     product(id: $slug, idType: SLUG) {
+      databaseId
       id
       name
       slug
@@ -44,6 +45,7 @@ export const GET_PRODUCT_BY_SLUG = gql`
         }
       }
       ... on SimpleProduct {
+        databaseId
         id
         name
         price
@@ -52,6 +54,7 @@ export const GET_PRODUCT_BY_SLUG = gql`
       ... on VariableProduct {
         variations {
           nodes {
+            databaseId
             id
             name
             price
@@ -72,6 +75,7 @@ export const GET_PRODUCT_BY_SLUG = gql`
         }
       }
       ... on GroupProduct {
+          databaseId
           id
           name
           price
@@ -83,6 +87,7 @@ export const GET_PRODUCT_BY_SLUG = gql`
           }
           products {
             nodes {
+              databaseId
               id
               name
               slug

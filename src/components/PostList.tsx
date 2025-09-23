@@ -36,10 +36,10 @@ export default function PostList() {
               src={post.featuredImage.node.sourceUrl} 
               alt={post.featuredImage.node.altText}
               style={{ 
-                maxWidth: '100%', 
-                height: 'auto',
                 marginBottom: '1rem'
               }}
+              width={500}
+              height={500}
             />
           )}
           
