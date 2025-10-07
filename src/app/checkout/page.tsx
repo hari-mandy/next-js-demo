@@ -1,8 +1,8 @@
 // src/app/checkout/page.tsx
 'use client'
-import { useMutation } from '@apollo/client';
+import { useMutation, useQuery } from '@apollo/client';
 import { useShoppingCart } from 'use-shopping-cart'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import CheckoutShippingMethods from '@/components/ShippingMethod'
 import DeliveryInfo from '../../components/DeliveryInfo'
 import PaymentMethods from '@/components/PaymentMethods'
@@ -22,19 +22,20 @@ type CartItem = {
 // types imported from context
 
 export default function CheckoutPage() {
-  const { cartDetails, cartCount, totalPrice } = useShoppingCart()
+  const { cartDetails, cartCount, totalPrice } = useShoppingCart();
   
-  const [enable, setEnable] = useState<number>(0)
   const [isOrderPlaced, setIsOrderPlaced] = useState(false)
   const [checkoutDetails, setCheckoutDetails] = useState<CheckoutFormData | null>(null)
   const [addToCartMutation] = useMutation(ADD_TO_CART);
-  const [totalAmount, setTotalAmount] = useState<number | undefined>(totalPrice);
   const [checkoutStepsValue, setCheckoutStepsValue] = useState<number>(0);
+
+  useEffect(() => {
+    handleAddToCart(Object.values(cartDetails ?? {}));
+  }, [cartDetails]);
 
   const handleAddToCart = (items: any[]) => {
     items.forEach(async (item: any) => {
       const productId = item?.variationId || item?.productId;
-
       await addToCartMutation({ variables: { productId, quantity: item.quantity } });
     });
   }

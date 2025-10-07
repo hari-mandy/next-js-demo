@@ -1,44 +1,11 @@
 import React, { useState, useContext } from 'react'
 import { checkoutContext } from '@/context/checkoutContext'
-import { useOrderService } from '@/hooks/useOrderService'
 import { useShoppingCart } from 'use-shopping-cart'
 import { CREATE_ORDER } from '@/queries/create-order'
 import { UPDATE_ORDER_STATUS } from '@/queries/update-order'
+import { EMPTY_CART } from '@/queries/empty-cart'
 import { useMutation } from '@apollo/client'
-
-type OrderInput = {
-  billing: {
-    firstName: string
-    lastName: string
-    address1: string
-    city: string
-    postcode: string
-    country: string
-    email: string
-    phone: string
-  }
-  shipping: {
-    firstName: string
-    lastName: string
-    address1: string
-    city: string
-    postcode: string
-    country: string
-  }
-  paymentMethod: string
-  lineItems: {
-    productId: number
-    quantity: number
-    variationId?: number | null
-  }[]
-  shippingLines: {
-    methodId: string
-    methodTitle: string 
-    total: string
-  }[]
-  status: string
-}
-
+import { useRouter } from 'next/navigation';
 
 const PlaceOrder = () => {
     const { checkoutDetails } = useContext(checkoutContext);
@@ -47,8 +14,8 @@ const PlaceOrder = () => {
     const [alertMessage, setAlertMessage] = useState<string>('');
     const [createOrderMutation] = useMutation(CREATE_ORDER);
     const [updateOrderMutatioin] = useMutation(UPDATE_ORDER_STATUS);
-
-    console.log(cartDetails);
+    const [emptyCart] = useMutation(EMPTY_CART);
+    const router = useRouter();
 
     const handlePlaceOrder = async () => {
 
@@ -127,8 +94,9 @@ const PlaceOrder = () => {
         })
         
         if (updateOrder.data.updateOrder.order.status === "PROCESSING") {
-            alert('Order Placed Successfully with order id' + order?.data?.createOrder?.order?.databaseId);
+            emptyCart({});
             clearCart();
+            router.push('/thankyou');
             return;
         }
 

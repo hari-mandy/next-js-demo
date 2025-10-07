@@ -7,6 +7,7 @@ export async function POST(req: NextRequest) {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      Authorization: `Bearer ${process.env.WORDPRESS_AUTH_REFRESHER_TOKEN}`, // private env var
     },
     body: JSON.stringify(body),
   });

@@ -20,3 +20,21 @@ export const ADD_TO_CART = gql`
     }
   }
 `
+
+export const UPDATE_SHIPPING_ADDRESS = gql`
+  mutation UpdateShippingAddress($input: UpdateCustomerInput!) {
+    updateCustomer(input: $input) {
+      customer {
+        shipping {
+          firstName
+          lastName
+          address1
+          city
+          state
+          postcode
+          country
+        }
+      }
+    }
+  }
+`

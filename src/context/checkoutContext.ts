@@ -41,13 +41,3 @@ export const checkoutSteps = createContext<CheckoutStepsContextType>({
   checkoutStepsValue: 0,
   setCheckoutStepsValue: () => {}, // dummy default
 });
-export type PlacedOrderIdType = {
-  PlacedOrderType: number;
-  setPlacedOrderId: React.Dispatch<React.SetStateAction<number>>;
-};
-
-// 👇 Give it a proper default value
-export const PlacedOrderType = createContext<PlacedOrderIdType>({
-  PlacedOrderType: 0,
-  setPlacedOrderId: () => {}, // dummy default
-});
