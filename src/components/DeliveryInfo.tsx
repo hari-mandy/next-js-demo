@@ -1,9 +1,10 @@
-import React, { useState, useContext, type ChangeEvent } from 'react';
+import React, { useState, useContext, useMemo, type ChangeEvent } from 'react';
 import { checkoutContext, type CheckoutFormData, checkoutSteps } from '@/context/checkoutContext';
 import { ADD_TO_CART } from '@/queries/add-to-cart';
 import { UPDATE_SHIPPING_ADDRESS } from '@/queries/add-to-cart';
-import { useMutation, useQuery } from '@apollo/client';
+import { useMutation } from '@apollo/client';
 import { useShoppingCart } from 'use-shopping-cart';
+import countryList from 'react-select-country-list';
 
 const emptyForm: CheckoutFormData = {
   name: '',
@@ -11,6 +12,7 @@ const emptyForm: CheckoutFormData = {
   mobilenumber: '',
   address: '',
   city: '',
+  country: '',
   zip: '',
 }
 
@@ -27,7 +29,16 @@ const DeliveryInfo = () => {
   ));
   const [alertMessage, setAlertMessage] = useState<string>('');
 
+  const countryOptions = useMemo(() => countryList().getData(), []);
+
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target
+    const next: CheckoutFormData = { ...emptyForm, ...formData, [name]: value }
+    setFormData(next)
+    ctx?.setCheckoutDetails(next)
+  }
+
+  const handleSelectChange = (e: ChangeEvent<HTMLSelectElement>) => {
     const { name, value } = e.target
     const next: CheckoutFormData = { ...emptyForm, ...formData, [name]: value }
     setFormData(next)
@@ -37,7 +48,7 @@ const DeliveryInfo = () => {
   const handleValidation = async () => {
     setButtonLock(true);
     // 1. Validate fields
-    if (!formData.name || !formData.email || !formData.address || !formData.city || !formData.zip || !formData.mobilenumber) {
+    if (!formData.name || !formData.email || !formData.address || !formData.city || !formData.country || !formData.zip || !formData.mobilenumber ) {
       setAlertMessage("Please Fill the billing Details !");
       return;
     }
@@ -48,6 +59,7 @@ const DeliveryInfo = () => {
         !formData.mobilenumber ||
         !formData.address ||
         !formData.shippingCity ||
+        !formData.shippingCountry ||
         !formData.shippingZip)
     ) {
       setAlertMessage("Please Fill the shipping Details");
@@ -77,7 +89,7 @@ const DeliveryInfo = () => {
               address1: formData.shippingAddress || formData.address,
               city: formData.shippingCity || formData.city,
               postcode: formData.shippingZip || formData.zip,
-              country: "IN",
+              country: formData.shippingCountry || formData.country,
               phone: formData.shippingMobile || formData.mobilenumber,
               email: formData.email,
             },
@@ -133,6 +145,20 @@ const DeliveryInfo = () => {
             className="w-full border p-2 rounded focus:border-blue-500 focus:outline-none"
             required
           />
+          <select
+            name="country"
+            value={formData.country || ''}
+            onChange={handleSelectChange}
+            className="w-full border p-2 rounded focus:border-blue-500 focus:outline-none"
+            required
+          >
+            <option value="">Select Country *</option>
+            {countryOptions.map((country: { value: string; label: string }) => (
+              <option key={country.value} value={country.value}>
+                {country.label}
+              </option>
+            ))}
+          </select>
           <div className="grid grid-cols-2 gap-4">
             <input
               type="text"
@@ -198,6 +224,20 @@ const DeliveryInfo = () => {
                 className="w-full border p-2 rounded focus:border-blue-500 focus:outline-none"
                 required={shippingEnabled}
               />
+              <select
+                name="shippingCountry"
+                value={formData.shippingCountry || ''}
+                onChange={handleSelectChange}
+                className="w-full border p-2 rounded focus:border-blue-500 focus:outline-none"
+                required={shippingEnabled}
+              >
+                <option value="">Select Country *</option>
+                {countryOptions.map((country: { value: string; label: string }) => (
+                  <option key={country.value} value={country.value}>
+                    {country.label}
+                  </option>
+                ))}
+              </select>
               <div className="grid grid-cols-2 gap-4">
                 <input
                   type="text"

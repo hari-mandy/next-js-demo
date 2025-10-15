@@ -1,7 +1,7 @@
 // components/CheckoutShippingMethods.tsx
 "use client"
 
-import React, { useState, useContext } from "react"
+import React, { useState, useContext, useEffect } from "react"
 import { useQuery } from "@apollo/client"
 import { GET_SHIPPING_METHODS } from "@/queries/get-shipping-methods"
 import { checkoutContext, type CheckoutFormData, checkoutSteps } from '@/context/checkoutContext';
@@ -22,7 +22,10 @@ type ShippingPackage = {
 const CheckoutShippingMethods = () => {
   const ctx = useContext(checkoutContext)
   const checkoutStep = useContext(checkoutSteps)
-  const { data, loading, error } = useQuery(GET_SHIPPING_METHODS)
+  const { data, loading, error, refetch } = useQuery(GET_SHIPPING_METHODS, {
+    fetchPolicy: "no-cache",
+    nextFetchPolicy: "no-cache",
+  })
   const [selected, setSelected] = useState<string | null>( ctx.checkoutDetails?.shippingMethodId || null)
   const [errorMessage, setErrorMessage] = useState<string>('');
 

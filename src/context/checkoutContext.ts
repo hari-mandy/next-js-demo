@@ -8,11 +8,13 @@ export interface CheckoutFormData {
   mobilenumber: string
   address: string
   city: string
+  country: string
   zip: string
   shippingName?: string
   shippingMobile?: string
   shippingAddress?: string
   shippingCity?: string
+  shippingCountry?: string
   shippingZip?: string
   shippingMethodId?: string
   shippingMethodTitle?: string

@@ -1,6 +1,6 @@
 'use client';
 
-import { useQuery, useMutation } from '@apollo/client';
+import { useQuery } from '@apollo/client';
 import { useEffect, useState } from 'react';
 import { GET_PRODUCT_BY_SLUG } from '../queries/get-products-by-slug';
 import { ProductDetailData } from '../types/product';
@@ -96,7 +96,7 @@ export default function ProductDetail({ slug }: ProductDetailProps) {
     <div>
         {
           addToCartBtn && (
-            <div className=' p-4 bg-green-100 border border-green-400 text-green-700 rounded mb-4'>
+            <div className='p-4 bg-green-100 border border-green-400 text-green-700 rounded mb-4'>
               <p className='text-center font-semibold'>Your Item is added to cart ! <Link href='/cart'>View Cart</Link></p>
             </div>
           )

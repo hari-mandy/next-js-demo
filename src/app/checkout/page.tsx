@@ -8,6 +8,7 @@ import DeliveryInfo from '../../components/DeliveryInfo'
 import PaymentMethods from '@/components/PaymentMethods'
 import { checkoutContext, type CheckoutFormData, checkoutSteps } from '@/context/checkoutContext'
 import { ADD_TO_CART } from '@/queries/add-to-cart';
+import { EMPTY_CART } from '@/queries/empty-cart'
 
 type CartItem = {
   id: string
@@ -19,7 +20,6 @@ type CartItem = {
     databaseId?: number
   }
 }
-// types imported from context
 
 export default function CheckoutPage() {
   const { cartDetails, cartCount, totalPrice } = useShoppingCart();
@@ -28,6 +28,7 @@ export default function CheckoutPage() {
   const [checkoutDetails, setCheckoutDetails] = useState<CheckoutFormData | null>(null)
   const [addToCartMutation] = useMutation(ADD_TO_CART);
   const [checkoutStepsValue, setCheckoutStepsValue] = useState<number>(0);
+  const [emptyCart] = useMutation(EMPTY_CART);
 
   useEffect(() => {
     handleAddToCart(Object.values(cartDetails ?? {}));
